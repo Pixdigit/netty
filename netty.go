@@ -13,15 +13,14 @@ type Connector struct {
 	incomingData chan map[string]string
 	state        Runlevel
 	isConnected  bool
-	selfInitRw           *bufio.ReadWriter
-	remoteInitRw           *bufio.ReadWriter
+	rw           *bufio.ReadWriter
 }
 
 func NewConnector(nc NetConf) (Connector, error) {
 	var err error
 	newConn := Connector{}
 	if ok, err := nc.Valid(); !ok {
-		return Connector{}, errors.Wrap(err, "invalid metwork configuration")
+		return Connector{}, errors.Wrap(err, "invalid network configuration")
 	}
 	newConn.netConf = nc
 	newConn.state = STOPPED
@@ -30,17 +29,27 @@ func NewConnector(nc NetConf) (Connector, error) {
 	if err != nil {
 		return Connector{}, errors.Wrap(err, "could not determine local address")
 	}
-	newConn.listener, err = net.Listen(newConn.netConf.Protocol, addr)
+	listener, err := net.Listen(newConn.netConf.Protocol, addr)
 	if err != nil {
-		return Connector{}, errors.Wrap(err, "unable to listen on "+newConn.listener.Addr().String())
+		addr, err2 := nc.FullLocalAddress()
+		if err2 != nil {
+			return Connector{}, errors.Wrap(err2, "unable to determine local address")
+		}
+		return Connector{}, errors.Wrap(err, "unable to listen on "+addr)
+	}
+	newConn.listener = listener
+
+	remoteAddr, _ := newConn.netConf.FullRemoteAddress()
+	clientConn, err := net.Dial(newConn.netConf.Protocol, remoteAddr)
+	if err != nil {
+		addr, err := nc.FullRemoteAddress()
+		if err != nil {
+			return Connector{}, errors.Wrap(err, "unable to determine remote address")
+		}
+		return Connector{}, errors.Wrap(err, "unable to connect to "+addr)
 	}
 
-	clientConn, err := net.Dial(newConn.NetConf.protocol, newConn.netConf.FullRemoteAddress())
-	if err != nil {
-		return Connector{}, errors.Wrap(err, "could not connect to remote address")
-	}
-	newConn.selfInitRw = bufio.NewReadWriter(bufio.NewReader(clientConn), bufio.NewWriter(clientConn))
-
+	newConn.rw = bufio.NewReadWriter(bufio.NewReader(clientConn), bufio.NewWriter(clientConn))
 
 	return newConn, nil
 }

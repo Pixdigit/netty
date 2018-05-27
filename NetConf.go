@@ -1,6 +1,9 @@
 package netty
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+	"strconv"
+)
 
 type NetConf struct {
 	Protocol   string
@@ -19,9 +22,9 @@ func (nc *NetConf) Valid() (bool, error) {
 	return false, errors.New("unknown protocol \"" + nc.Protocol + "\"")
 }
 
-func (nc *NetConf) FullLocalAddress() (string, error){
-	return nc.LocalAddr + string(nc.LocalPort), nil
+func (nc *NetConf) FullLocalAddress() (string, error) {
+	return nc.LocalAddr + ":" + strconv.Itoa(int(nc.LocalPort)), nil
 }
-func (nc *NetConf) FullRemoteAddress() (string, error){
-	return nc.RemoteAddr + string(nc.RemotePort), nil
+func (nc *NetConf) FullRemoteAddress() (string, error) {
+	return nc.RemoteAddr + ":" + strconv.Itoa(int(nc.RemotePort)), nil
 }
