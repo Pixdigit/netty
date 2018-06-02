@@ -21,8 +21,8 @@ const EOK_RUNE = rune('/')
 //End of value (and transmission) indicator
 const EOT_RUNE = rune('!')
 
-var LOCALNETCONF NetConf
+var LOCALNETCONF ConnectionConf
 
 func init() {
-	LOCALNETCONF = NetConf{TCP, "localhost", 49125, "localhost", 49125}
+	LOCALNETCONF = ConnectionConf{TCP, "localhost", 49125, "localhost", 49125}
 }
