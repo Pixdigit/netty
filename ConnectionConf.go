@@ -14,18 +14,18 @@ type ConnectionConf struct {
 	RemotePort uint16
 }
 
-func (nc *ConnectionConf) Valid() (bool, error) {
+func (cc *ConnectionConf) Valid() (bool, error) {
 	for _, protocol := range protocols {
-		if protocol == nc.Protocol {
+		if protocol == cc.Protocol {
 			return true, nil
 		}
 	}
-	return false, errors.New("unknown protocol \"" + nc.Protocol + "\"")
+	return false, errors.New("unknown protocol \"" + cc.Protocol + "\"")
 }
 
-func (nc *ConnectionConf) FullLocalAddress() (string, error) {
-	return nc.LocalAddr + ":" + strconv.Itoa(int(nc.LocalPort)), nil
+func (cc *ConnectionConf) FullLocalAddress() (string, error) {
+	return cc.LocalAddr + ":" + strconv.Itoa(int(cc.LocalPort)), nil
 }
-func (nc *ConnectionConf) FullRemoteAddress() (string, error) {
-	return nc.RemoteAddr + ":" + strconv.Itoa(int(nc.RemotePort)), nil
+func (cc *ConnectionConf) FullRemoteAddress() (string, error) {
+	return cc.RemoteAddr + ":" + strconv.Itoa(int(cc.RemotePort)), nil
 }
